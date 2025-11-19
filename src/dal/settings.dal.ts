@@ -5,7 +5,7 @@ import merge from 'lodash.merge';
 
 export interface SettingDAL {
   get(clientId: number): Promise<Setting>;
-  update( body: Partial<Setting>): Promise<Setting>;
+  update(body: Partial<Setting>): Promise<Setting>;
 }
 
 export const createSettingDAL = (db: Db): SettingDAL => {
@@ -16,22 +16,22 @@ export const createSettingDAL = (db: Db): SettingDAL => {
       const result = await settings.findOneAndUpdate(
         { clientId },
         { $setOnInsert: defaultSetting(clientId) },
-        { upsert: true, returnDocument: 'after' }
+        { upsert: true, returnDocument: 'after' },
       );
       return result;
     },
 
-    async update( body) {
+    async update(body) {
       const clientId = body.clientId;
       const defaultData = defaultSetting(clientId);
 
       const data = merge(defaultData, body);
-      delete data._id
+      delete data._id;
 
-      const result= await settings.findOneAndUpdate(
+      const result = await settings.findOneAndUpdate(
         { clientId },
         { $set: data },
-        { upsert: true, returnDocument: 'after' }
+        { upsert: true, returnDocument: 'after' },
       );
 
       return result;
@@ -39,6 +39,6 @@ export const createSettingDAL = (db: Db): SettingDAL => {
   };
 };
 
-export function defaultSetting(clientId: number):Setting {
-  return {...settingSchema.getDefault(),clientId};
+export function defaultSetting(clientId: number): Setting {
+  return { ...settingSchema.getDefault(), clientId };
 }

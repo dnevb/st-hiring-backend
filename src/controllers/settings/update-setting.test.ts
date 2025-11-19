@@ -5,9 +5,11 @@ import { Setting } from '../../entity/setting';
 
 describe('Update Settings test suite', () => {
   it('should return 400 if clientId is missing from the request body', async () => {
-    const res = await request(app).put('/settings').send({
-      customerInfo: { active: true, addressInfo: false, basicInfo: true },
-    });
+    const res = await request(app)
+      .put('/settings')
+      .send({
+        customerInfo: { active: true, addressInfo: false, basicInfo: true },
+      });
     expect(res.statusCode).toEqual(400);
   });
 

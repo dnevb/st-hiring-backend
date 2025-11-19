@@ -14,7 +14,8 @@ export const settingSchema = yup.object({
         })
         .required(),
     )
-    .required().default([]),
+    .required()
+    .default([]),
   fulfillmentFormat: yup
     .object({
       rfid: yup.boolean().required().default(false),

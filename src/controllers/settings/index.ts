@@ -4,6 +4,4 @@ import { createGetSettingHandler } from './get-setting';
 import { createUpdateSettingHandler } from './update-setting';
 
 export const createSettingController = (settingDAL: SettingDAL) =>
-  Router()
-    .use(createGetSettingHandler(settingDAL))
-    .use(createUpdateSettingHandler(settingDAL))
+  Router().use(createGetSettingHandler(settingDAL)).use(createUpdateSettingHandler(settingDAL));

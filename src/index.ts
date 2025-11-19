@@ -26,7 +26,7 @@ app.use('/health', (_req, res) => {
 });
 
 app.use('/events', createGetEventsController({ eventsDAL: eventDAL, ticketsDAL: TicketDAL }));
-app.use('/settings', createSettingController(settingDAL))
+app.use('/settings', createSettingController(settingDAL));
 
 app.use('/', (_req, res) => {
   res.json({ message: 'Hello API' });
