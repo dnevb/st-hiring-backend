@@ -26,6 +26,7 @@ export const createSettingDAL = (db: Db): SettingDAL => {
       const defaultData = defaultSetting(clientId);
 
       const data = merge(defaultData, body);
+      delete data._id
 
       const result= await settings.findOneAndUpdate(
         { clientId },
