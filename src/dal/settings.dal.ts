@@ -1,71 +1,43 @@
 import { type Db } from 'mongodb';
-import { Setting } from '../entity/setting';
+import { type Setting } from '../entity/setting';
+import { settingSchema } from '../controllers/settings/domain';
+import merge from 'lodash.merge';
 
 export interface SettingDAL {
-  get(clientId: number): Promise<Setting | undefined>;
-  update(body: Setting): Promise<Setting>;
-  create(body: Setting): Promise<Setting>;
+  get(clientId: number): Promise<Setting>;
+  update( body: Partial<Setting>): Promise<Setting>;
 }
 
 export const createSettingDAL = (db: Db): SettingDAL => {
-  const setting = db.collection('setting');
+  const settings = db.collection<Setting>('setting');
 
   return {
     async get(clientId) {
-      const result = await setting.findOne<Setting>({ clientId });
-      if (!result) return this.create(defaultSetting(clientId));
+      const result = await settings.findOneAndUpdate(
+        { clientId },
+        { $setOnInsert: defaultSetting(clientId) },
+        { upsert: true, returnDocument: 'after' }
+      );
+      return result;
+    },
+
+    async update( body) {
+      const clientId = body.clientId;
+      const defaultData = defaultSetting(clientId);
+
+      const data = merge(defaultData, body);
+
+      const result= await settings.findOneAndUpdate(
+        { clientId },
+        { $set: data },
+        { upsert: true, returnDocument: 'after' }
+      );
 
       return result;
     },
-    async update({ _id, ...body }) {
-      if (!body.clientId) return undefined;
-      const res = await setting.replaceOne({ clientId: body.clientId }, body);
-      if (!res.matchedCount)
-        return this.create({
-          ...defaultSetting(body.clientId),
-          ...body,
-          clientId: body.clientId,
-        });
-      if (!res.modifiedCount) return undefined;
-
-      return this.get(body.clientId);
-    },
-    async create({ _id, ...body }) {
-      const res = await setting.insertOne(body);
-      if (!res.acknowledged) return undefined;
-      return body;
-    },
   };
 };
-export function defaultSetting(clientId: number) {
-  return {
-    clientId,
-    deliveryMethods: [],
-    fulfillmentFormat: {
-      rfid: false,
-      print: false,
-    },
-    printingFormat: {
-      formatA: false,
-      formatB: false,
-    },
-    scanning: {
-      scanManually: false,
-      scanWhenComplete: false,
-    },
-    paymentMethods: {
-      cash: false,
-      creditCard: false,
-      comp: false,
-    },
-    ticketDisplay: {
-      leftInAllotment: false,
-      soldOut: false,
-    },
-    customerInfo: {
-      active: false,
-      basicInfo: false,
-      addressInfo: false,
-    },
-  } satisfies Partial<Setting>;
+
+export function defaultSetting(clientId: number):Setting {
+  return {...settingSchema.getDefault(),clientId};
 }
